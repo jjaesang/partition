@@ -1,10 +1,7 @@
 package com.jaesang.assignment.broker;
 
 import com.jaesang.assignment.partitioner.AsciiCodePartitioner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runners.MethodSorters;
 
 import java.util.HashSet;
@@ -15,12 +12,12 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class FilePartitioningBrokerTest {
 
-    private AsciiCodePartitioner partitioner;
+    private static AsciiCodePartitioner partitioner;
 
-    private final ConcurrentMap<Integer, Partition> topic = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Integer, Partition> topic = new ConcurrentHashMap<>();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         int partitionNum = 3;
         partitioner = new AsciiCodePartitioner(partitionNum);
 
@@ -67,13 +64,6 @@ public class FilePartitioningBrokerTest {
     public void test3consumeMessage() throws InterruptedException {
 
         Message message = new Message("a","abcChoco");
-        int partitionId = partitioner.getPartition(message.getKey());
-        Partition partition = topic.get(partitionId);
-        partition.addQueueMessage(message);
-        partition.addKeySets(message.getKey());
-        topic.put(partitionId, partition);
-
-
         int consumerPartitionId = partitioner.getPartition(message.getKey());
         Partition consumePartition = topic.get(consumerPartitionId);
 
