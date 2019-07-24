@@ -1,0 +1,6 @@
+com/jaesang/assignment/utils/ValidatorUtilTest.class
+com/jaesang/assignment/consumer/FilePartitioningConsumerTest.class
+com/jaesang/assignment/broker/FilePartitioningBrokerTest.class
+com/jaesang/assignment/producer/FilePartitioningProducerTest.class
+com/jaesang/assignment/partitioner/AsciiCodePartitionerTest.class
+com/jaesang/assignment/utils/KeyGeneratorUtilTest.class

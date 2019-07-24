@@ -1,0 +1,6 @@
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/producer/FilePartitioningProducerTest.java
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/broker/FilePartitioningBrokerTest.java
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/utils/ValidatorUtilTest.java
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/partitioner/AsciiCodePartitionerTest.java
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/consumer/FilePartitioningConsumerTest.java
+/Users/jaesang/IdeaProjects/partition/src/test/java/com/jaesang/assignment/utils/KeyGeneratorUtilTest.java
