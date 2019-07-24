@@ -12,7 +12,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-
+/**
+ * 1. 파일을 읽어 각 단어에 대한 유효성 검사
+ * 2. 유요한 단어에 대한 Key값 생성 후, Key/Value 형태의 Message로 Broker에게 Produce
+ */
 public class FilePartitioningProducer implements Runnable {
 
     private static Logger logger = Logger.getLogger(FilePartitioningProducer.class);
