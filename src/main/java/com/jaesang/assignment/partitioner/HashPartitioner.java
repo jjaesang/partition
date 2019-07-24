@@ -1,6 +1,9 @@
 package com.jaesang.assignment.partitioner;
 
-
+/**
+ * Key HashCode 기반 파티셔너
+ * 사용하지 않은 파티셔너
+ */
 public class HashPartitioner extends Partitioner {
 
     private int numPartition;
