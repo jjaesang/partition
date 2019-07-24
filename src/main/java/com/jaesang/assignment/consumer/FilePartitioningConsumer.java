@@ -11,6 +11,11 @@ import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * 1. 각 쓰레드 당 Consuming할 파티션 정보를 얻어옴
+ * 2. 해당 파티션의 저장한 Message Key 메타정보를 가져와, FilerWriter 초기화
+ * 3. 파티션의 Message를 하나씩 읽어와, 저장되어야 할 파일에 전송
+ */
 public class FilePartitioningConsumer implements Runnable {
     private static Logger logger = Logger.getLogger(FilePartitioningConsumer.class);
 
@@ -26,8 +31,8 @@ public class FilePartitioningConsumer implements Runnable {
 
     /**
      * 각 Thread 당 Consuming할 파티션 정보를 받아옴
-     * 해당 파티션 내, 다수의 키가 존재할 수 있기 때문에, 해당 파티션에 들어있는 키에 대한 Meta정보를 이용해
-     * 작업할 Key에 대한 파일을 생성함
+     * 해당 파티션 내, 다수의 Key가 존재할 수 있기 때문에, 해당 파티션의 Key Meta정보를 이용해
+     * 저장할 Key에 대한 파일을 생성함
      */
     public void run() {
 
@@ -45,9 +50,7 @@ public class FilePartitioningConsumer implements Runnable {
             writerMap.get(message.getKey()).write(message);
         }
 
-        /**
-         * 해당 파티션의 단어를 모두 읽은 뒤, Writer는 한번에 정리
-         */
+        // 해당 파티션의 단어를 모두 읽은 뒤, Writer는 한번에 정리
         for (FilePartitioningConsumerWriter writer : writerMap.values()) {
             logger.debug(writer.getFileName() +" is closed .. ");
             writer.close();

@@ -12,7 +12,7 @@ import java.util.Set;
 public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
     private static Logger logger = Logger.getLogger(FilePartitioningConsumerWriter.class);
 
-    private final Set<String> writtenWordset = new HashSet<String>();
+    private final Set<String> writtenWordset = new HashSet<>();
 
     private Path fileName;
     private BufferedWriter writer;
@@ -33,7 +33,7 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     /**
      * 해당 단어가 이미 쓰여진 단어를 확인한 후, 쓰여져 있지 않다면 파일에 기록
-     * @param message
+     * @param message Message("a","Acava")
      */
     @Override
     public void write(Message message) {
@@ -72,8 +72,8 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     /**
      * 한번 쓰여진 단어인지 확인하는 메소드
-     * @param message
-     * @return
+     * @param message Message("a","Acava")
+     * @return true
      */
     private boolean isDuplicate(Message message) {
         return writtenWordset.contains(message.getValue());
