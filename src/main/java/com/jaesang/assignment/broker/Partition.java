@@ -3,6 +3,9 @@ package com.jaesang.assignment.broker;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * 각 파티션에 하나의 큐와, 파티션에 들어있는 Key값에 대한 메타정보를 관리
+ */
 public class Partition {
     private LinkedBlockingQueue<Message> queue;
     private HashSet<String> keySets;

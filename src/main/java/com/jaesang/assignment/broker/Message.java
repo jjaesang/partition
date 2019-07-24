@@ -1,5 +1,8 @@
 package com.jaesang.assignment.broker;
 
+/**
+ * 단어에 대한 키와 함께 Producer/Consumer의 레코드 관리
+ */
 public class Message {
 
     private String key;

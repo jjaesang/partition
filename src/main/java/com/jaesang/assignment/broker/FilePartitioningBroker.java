@@ -104,7 +104,6 @@ public class FilePartitioningBroker {
 
     /**
      * 각 Consumer Thread 마다, FIFO 방식으로 파티션 할당
-     *
      * @return Partition
      */
     public Partition getAssignedPartition() {

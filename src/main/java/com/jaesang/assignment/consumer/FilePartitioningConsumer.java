@@ -11,16 +11,9 @@ import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * 　　1) 파티션에서 순차적으로 단어를 1개씩 가져온다.
- * 　　　　　2) 단어가 알파벳으로 시작한다면 단어의 첫 알파벳에 해당하는 파일 끝에 주어진 단어를 추가 해야한다.
- * 　　　　　　 예) apple, Apple은 a.txt 파일 끝에 추가 해야한다. (대소문자 구분없음)
- * 　　　　　3) 단어가 숫자로 시작한다면 number.txt 파일 끝에 주어진 단어를 추가 해야한다.
- * 　　　　　　 예) 1-point, 2-point는 number.txt 파일 끝에 추가 해야한다.
- * 　　　　　4) 주어진 단어가 대상 파일에 이미 쓰여진 단어인지 대소문자 구분 없이 중복검사를 수행하고, 중복되지 않은 단어라면 대상 파일 끝에 단어를 추가한다.
- */
 public class FilePartitioningConsumer implements Runnable {
     private static Logger logger = Logger.getLogger(FilePartitioningConsumer.class);
+
     private static final String FILE_EXTENSION = ".txt";
 
     private FilePartitioningBroker filePartitioningBroker;
@@ -52,7 +45,11 @@ public class FilePartitioningConsumer implements Runnable {
             writerMap.get(message.getKey()).write(message);
         }
 
+        /**
+         * 해당 파티션의 단어를 모두 읽은 뒤, Writer는 한번에 정리
+         */
         for (FilePartitioningConsumerWriter writer : writerMap.values()) {
+            logger.debug(writer.getFileName() +" is closed .. ");
             writer.close();
         }
 

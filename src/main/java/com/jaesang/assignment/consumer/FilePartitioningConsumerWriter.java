@@ -17,6 +17,10 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
     private Path fileName;
     private BufferedWriter writer;
 
+    /**
+     * 각 키 별로 하나의 Writer객체를 생성
+     * @param fileName a.txt
+     */
     public FilePartitioningConsumerWriter(Path fileName) {
         this.fileName = fileName;
         try {
@@ -27,6 +31,10 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     }
 
+    /**
+     * 해당 단어가 이미 쓰여진 단어를 확인한 후, 쓰여져 있지 않다면 파일에 기록
+     * @param message
+     */
     @Override
     public void write(Message message) {
         if (isDuplicate(message)) {
@@ -44,6 +52,9 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     }
 
+    /**
+     * 파일 쓰기 작업 종류 및 리소스 정리
+     */
     @Override
     public void close() {
 
@@ -55,6 +66,15 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
         }
     }
 
+    public String getFileName(){
+        return fileName.getFileName().toString();
+    }
+
+    /**
+     * 한번 쓰여진 단어인지 확인하는 메소드
+     * @param message
+     * @return
+     */
     private boolean isDuplicate(Message message) {
         return writtenWordset.contains(message.getValue());
     }
