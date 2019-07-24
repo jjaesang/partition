@@ -24,7 +24,7 @@ $ echo "echo partitioned word file.. thanks "
 ---
 
 # 프로그램 설명 및 주요 고려사항
-해당 프로그램은 Producer-Consumer 패턴을 응용하여 구현히여 단어를 복수의 파일로 분리하는 프로그램을 설계 
+해당 프로그램은 Producer-Consumer 패턴을 응용하여, 단어를 복수의 파일로 분리하는 프로그램을 설계 
 
 ## 1. Producer 
 파일을 읽어 Broker에게 메세지 전달하는 프로세스
