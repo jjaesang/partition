@@ -7,69 +7,54 @@ import org.apache.log4j.Logger;
 import java.util.HashSet;
 import java.util.concurrent.*;
 
+/**
+ * - Producer로 받은 Message에 대한 파티셔닝 작업 진행
+ * - 파티셔닝 정보에 따른, 각 Message을 파티션에 저장
+ *
+ * - 각 Consumer에게 파티션 정보를 할당
+ * - 할당받은 Consumer가 consumer 요청 시, 해당 파티션의 Message을 전송
+ */
 public class FilePartitioningBroker {
 
     private static Logger logger = Logger.getLogger(FilePartitioningBroker.class);
 
-    private final ConcurrentMap<Integer, Partition> topic = new ConcurrentHashMap<Integer, Partition>();
-    private final BlockingQueue<Integer> assignedPartition = new LinkedBlockingQueue<Integer>();
+    private final ConcurrentMap<Integer, Partition> topic = new ConcurrentHashMap<>();
+    private final BlockingQueue<Integer> assignedPartition = new LinkedBlockingQueue<>();
 
     private Partitioner partitioner;
 
-
-    LinkedBlockingQueue<Message> queue;
-    HashSet<String> keySets;
-
     public FilePartitioningBroker(int partitionNum) {
         partitioner = new AsciiCodePartitioner(partitionNum);
-       // setUpPartitionInfo();
     }
 
-//    private void setUpPartitionInfo() {
-//        int partitionNum = partitioner.getPartitionNum();
-//        for (int partitionId = 0; partitionId < partitionNum; partitionId++) {
-//            topic.put(partitionId, new Partition(new LinkedBlockingQueue<Message>(), new HashSet<String>()));
-//        }
-//    }
+    /**
+     * 저장할 Partition 정보를 사전에 정의
+     */
+    public void setPartitionInfo() {
 
-    public void produceMessage(Message message) {
-        try {
-            int partitionId = partitioner.getPartition(message.getKey());
-            if (topic.containsKey(partitionId)) {
-                queue = topic.get(partitionId).getQueue();
-                keySets = topic.get(partitionId).getKeySets();
-            } else {
-                logger.debug(
-                        "allocated new key " + partitionId + " so, create new LinkedBlockingQueue");
-                queue = new LinkedBlockingQueue<Message>();
-                keySets = new HashSet<String>();
-            }
-
-            queue.offer(message, 1, TimeUnit.SECONDS);
-            keySets.add(message.getKey());
-
-            topic.put(partitionId, new Partition(queue, keySets));
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        logger.debug("init partition information Before producing Job");
+        int partitionNum = partitioner.getPartitionNum();
+        for (int partitionId = 0; partitionId < partitionNum; partitionId++) {
+            topic.put(partitionId, new Partition(new LinkedBlockingQueue<>(), new HashSet<>()));
         }
-
     }
 
-//    public void produceMessage(Message message) {
-//        String key = message.getKey();
-//
-//        int partitionId = partitioner.getPartition(key);
-//        Partition partition = topic.get(partitionId);
-//
-//        if (partition.addQueueMessage(message) && partition.addKeySets(message.getKey()))
-//            topic.put(partitionId, partition);
-//        else {
-//            throw new RuntimeException("produce message is failed .. " + message.toString());
-//        }
-//
-//
-//    }
+    /**
+     * Producer가 전달한 Message Key기반 Partition 할당
+     * 할당받은 Partition에 데이터 저장 및 Message Key 메타정보 업데이트
+     *
+     * @param message
+     */
+    public void produceMessage(Message message) {
+        int partitionId = partitioner.getPartition(message.getKey());
+        Partition partition = topic.get(partitionId);
+
+        partition.addQueueMessage(message);
+        partition.addKeySets(message.getKey());
+
+        topic.put(partitionId, partition);
+    }
+
 
     /**
      * 각 Consumer Thread 당, 할당된 Partition의 Queue에서 1개씩 데이터를 가져옴
@@ -92,6 +77,7 @@ public class FilePartitioningBroker {
      */
     public void setAssignPartition() {
 
+        logger.debug("init assigend partition information for consuming Job");
         try {
             for (int partitionId : topic.keySet()) {
                 assignedPartition.offer(partitionId, 1, TimeUnit.SECONDS);
@@ -104,6 +90,7 @@ public class FilePartitioningBroker {
 
     /**
      * 각 Consumer Thread 마다, FIFO 방식으로 파티션 할당
+     *
      * @return Partition
      */
     public Partition getAssignedPartition() {
@@ -118,8 +105,7 @@ public class FilePartitioningBroker {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out
-                .println(Thread.currentThread().getName() + " getAssignPartition : " + partitionId);
+        System.out.println(Thread.currentThread().getName() + " getAssignPartition : " + partitionId);
         return topic.get(partitionId);
 
     }
