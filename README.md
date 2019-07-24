@@ -18,7 +18,7 @@ $ cd partition
 $ mkdir output # output을 저장할 directory 생성
 $ mvn compile assembly:single
 $ java -jar target/partition-1.0-jar-with-dependencies.jar input/words.txt output 10
-$ echo "echo partitioned word file.. thanks "
+$ echo " partitioning file is finished.. thanks "
 ```
 
 ---
@@ -31,13 +31,13 @@ $ echo "echo partitioned word file.. thanks "
 
 ### 키 생성 방법
 - 키값은 알파벳으로 시작하는 경우, **소문자화하여 첫번째 글자**로 키 설정
-    - e.g. Aac -> a / aac -> a / Zzz -> a  ..
+    - e.g. Aac -> a / aac -> a / Zzz -> z  ..
 - 숫자로 시작하는 경우, **number**로 변경
     - e.g. 1-point -> number / 2abe -> number
 
 
 ### 키를 다음과 같은 방법으로 선정한 이유 
-1. 동일한 단어는 동일한 파티션에 할당해야함 
+1. 동일한 단어는 같 파티션에 할당해야함 
     -  동일한 단어는 첫번째 글자도 같기 때문에, 키값으로 파티셔닝시 동일한 단어는 같은 파티션에 할당되는 것을 보장함 
 
 2. 단어가 알파벳으로 시작하면 첫 알파벳에 해당되는 파일에 써야하며, 숫자로 시작하는 단어는 number.txt에 할당해야함
@@ -46,7 +46,7 @@ $ echo "echo partitioned word file.. thanks "
 
 ## 2. Broker
 Producer로 부터 받은 메세지를 파티셔닝하여 파티션을 관리하며, Consumer 요청에 따라 메세지 전달
-> 각 파티션 당, 메세지를 보관하는 큐와 할당된 메세지의 키 메타정보 관리
+> 각 파티션 당, 메세지를 보관하는 큐와 할당된 메세지의 키의 메타정보 관리
 
 ### 파티셔닝
 키/값 파티셔닝의 방법론 중, 해당 데이터 특성에 맞추어 **AsciiCode 기반 파티셔너** 생성
@@ -55,19 +55,19 @@ Producer로 부터 받은 메세지를 파티셔닝하여 파티션을 관리하
 
 1. 키값이 입력으로 주어진 파티션 개수(N)만큼 균등하게 할당되지 않을 수 있음
 2. hashcode는 음수가 될 수 있기 때문에, 음수 처리하지 않는다면 N + 1개의 파티션으로 분할될 수 있음
-3. hashcode에 대한 양수로 변환시, 한 개의 파티션에 2개의 키값이 할당될 수 있음
+3. hashcode을 양수로 변환 작업하더라도, 한 개의 파티션에 2개의 키값이 할당될 수 있음
 > - 27개의 파티션으로 나눌 시, 한개의 파티션에 2개의 키값이 들어갈 수 있음 
 > - e.g. Partition#4 -> [number , i] 
 
 다음과 같은 이유로, hashcode 대신 AsciiCode 기반으로 파티셔너 설계
 
-키값의 범위를 알고있기때문에, 일련된 연속된 숫자로 정의
+키값의 범위와 파티션의 최대 개수를 알고 있기 때문에, AsciiCode값 기반의 연속된 숫자로 정의
 >  - 최대 27개로 파티션을 나누더라도, 하나의 파티션에서는 한개의 키만 할당을 보장하기 위함 
->  - number에 대한 키는 AsciiCode z의 다음번호인 '}'로 변환하여 파티셔닝을 수행 
+>  - number에 대한 키는 AsciiCode z의 다음번호인 '{'로 변환하여 파티셔닝을 수행 
 
 
 ### Consumer Thread에게 파티션 할당
- - Broker는 Consumer의 요청이 들어올 시, 파티션과 Consumer을 1:1 할당
+ - Broker는 Consumer의 요청이 들어올 시, 파티션과 Consumer를 1:1로 할당
      > 할당 원칙은 FIFO
 
 
@@ -77,8 +77,8 @@ Broker로부터 Consuming할 파티션을 할당받아, 해당 파티션에 대�
 ### 키값에 해당되는 파일에 단어 저장
  - Broker에게 할당받은 파티션 정보 기반으로 해당 키마다 쓰여질 파일 쓰는 객체 생성
     -  파티션에서 하나씩 읽어와, 키 값에 해당되는 writer객체에게 전달하여 데이터 저장
-    -  각 writer는 저장하기 전, 자신만의 중복검사하는 리스트를 관리하여 저장여부를 판단
-    -  파티션에 저장된 데이터를 다 저장한 후에 write객체 정리
+    -  각 writer는 저장하기 전, 자신만의 중복검사하는 셋을 관리하여 저장 여부를 판단
+    -  파티션의 쌓여있는 데이터를 다 처리한 뒤, 열려있는 write객체 정리
 
 
 ---
