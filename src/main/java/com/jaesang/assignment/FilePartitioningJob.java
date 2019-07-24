@@ -20,6 +20,11 @@ public class FilePartitioningJob {
 
     private FilePartitioningBroker filePartitioningBroker;
 
+    /**
+     * Argument Validation 및 Parsing
+     * Producer / Consumer의 ThreadPool 설정
+     * @param args
+     */
     private void init(String[] args) {
 
         ValidatorUtil validatorUtil = new ValidatorUtil();
@@ -35,19 +40,27 @@ public class FilePartitioningJob {
         this.consumerExecutor = Executors.newFixedThreadPool(numPartition);
     }
 
+
+    /**
+     * Producing하기 전, 브로커에게 Producing할 파티션 정보 설정 요청
+     * 설정 된 후, 파일을 읽어 브로커에게 Message 전송
+     */
     private void startProducer() {
+
+        filePartitioningBroker.setPartitionInfo();
 
         Future producerStatus = producerExecutor.submit(new FilePartitioningProducer(inputPath, filePartitioningBroker));
         try {
             producerStatus.get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
 
     }
 
+    /**
+     * 작업 완료 후, 리소스 정리
+     */
     private void stopProducer() {
 
         try {
@@ -59,6 +72,10 @@ public class FilePartitioningJob {
 
     }
 
+    /**
+     * Consuming하기 전, 브로커에게 각 Consumer Thread가 할당할 파티션 정보 설정 요청
+     * 설정 된 후, 브로커에게 할당받은 파티션 정보를 읽어 파일에 저장
+     */
     private void startConsumer() {
 
         filePartitioningBroker.setAssignPartition();
@@ -67,6 +84,9 @@ public class FilePartitioningJob {
 
     }
 
+    /**
+     * 작업 완료 후, 리소스 정리
+     */
     private void stopConsumer() {
         try {
             consumerExecutor.shutdown();
@@ -102,7 +122,6 @@ public class FilePartitioningJob {
         try {
             filePartitioningJob.init(args);
         } catch (IllegalArgumentException e) {
-            //print usage and terminate program
             filePartitioningJob.printUsage();
             return;
         }
