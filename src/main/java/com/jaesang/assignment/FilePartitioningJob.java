@@ -23,6 +23,7 @@ public class FilePartitioningJob {
     /**
      * Argument Validation 및 Parsing
      * Producer / Consumer의 ThreadPool 설정
+     *
      * @param args
      */
     private void init(String[] args) {
@@ -46,15 +47,10 @@ public class FilePartitioningJob {
      * 설정 된 후, 파일을 읽어 브로커에게 Message 전송
      */
     private void startProducer() {
+        logger.info("start producer");
 
         filePartitioningBroker.setPartitionInfo();
-
-        Future producerStatus = producerExecutor.submit(new FilePartitioningProducer(inputPath, filePartitioningBroker));
-        try {
-            producerStatus.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        producerExecutor.execute(new FilePartitioningProducer(inputPath, filePartitioningBroker));
 
     }
 
@@ -62,10 +58,11 @@ public class FilePartitioningJob {
      * 작업 완료 후, 리소스 정리
      */
     private void stopProducer() {
+        logger.info("end producer");
 
         try {
             producerExecutor.shutdown();
-            producerExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            producerExecutor.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             logger.info("interrupted exception occurred");
         }
@@ -77,6 +74,7 @@ public class FilePartitioningJob {
      * 설정 된 후, 브로커에게 할당받은 파티션 정보를 읽어 파일에 저장
      */
     private void startConsumer() {
+        logger.info("start consumer");
 
         filePartitioningBroker.setAssignPartition();
         for (int i = 0; i < numPartition; i++)
@@ -88,9 +86,11 @@ public class FilePartitioningJob {
      * 작업 완료 후, 리소스 정리
      */
     private void stopConsumer() {
+        logger.info("stop consumer");
+
         try {
             consumerExecutor.shutdown();
-            consumerExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            consumerExecutor.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.info("interrupted exception occurred");
         }
@@ -98,13 +98,10 @@ public class FilePartitioningJob {
 
     public void run() {
 
-        logger.info("start producer");
         startProducer();
-        logger.info("start consumer");
         startConsumer();
-        logger.info("end producer");
+
         stopProducer();
-        logger.info("stop consumer");
         stopConsumer();
 
     }

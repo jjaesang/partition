@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 
 
 import java.nio.file.Paths;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 1. 각 쓰레드 당 Consuming할 파티션 정보를 얻어옴
@@ -36,23 +36,28 @@ public class FilePartitioningConsumer implements Runnable {
      */
     public void run() {
 
-        Partition partition = filePartitioningBroker.getAssignedPartition();
+        Map<String, FilePartitioningConsumerWriter> writerMap = new HashMap<>();
 
-        ConcurrentHashMap<String, FilePartitioningConsumerWriter> writerMap = new ConcurrentHashMap<>();
-        for (String key : partition.getKeySets()) {
-            writerMap.put(key, new FilePartitioningConsumerWriter(Paths.get(outputPath, key + FILE_EXTENSION)));
-        }
-
-        LinkedBlockingQueue<Message> queue = partition.getQueue();
         Message message;
-        while (!queue.isEmpty()) {
-            message = filePartitioningBroker.consumeMessage(queue);
-            writerMap.get(message.getKey()).write(message);
+        Partition partition = filePartitioningBroker.getAssignedPartition();
+        while (true) {
+            message = filePartitioningBroker.consumeMessage(partition.getQueue());
+            if(message == null){
+                logger.info("Timeout occur.. it's mean that does not have comsuming code : TIMEOUT");
+                break;
+            }
+
+            String key = message.getKey();
+           if (!writerMap.containsKey(key)) {
+                writerMap.put(key, new FilePartitioningConsumerWriter(Paths.get(outputPath, key + FILE_EXTENSION)));
+            }
+            writerMap.get(key).write(message);
+
         }
 
         // 해당 파티션의 단어를 모두 읽은 뒤, Writer는 한번에 정리
         for (FilePartitioningConsumerWriter writer : writerMap.values()) {
-            logger.debug(writer.getFileName() +" is closed .. ");
+            logger.info(Thread.currentThread().getName()+" " + writer.getFileName() + " is closed .. ");
             writer.close();
         }
 

@@ -19,6 +19,7 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     /**
      * 각 키 별로 하나의 Writer객체를 생성
+     *
      * @param fileName a.txt
      */
     public FilePartitioningConsumerWriter(Path fileName) {
@@ -33,6 +34,7 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
 
     /**
      * 해당 단어가 이미 쓰여진 단어를 확인한 후, 쓰여져 있지 않다면 파일에 기록
+     *
      * @param message Message("a","Acava")
      */
     @Override
@@ -45,7 +47,7 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
             String word = message.getValue();
             writer.write(word);
             writer.newLine();
-            writtenWordset.add(word);
+            writtenWordset.add(word.toLowerCase());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,17 +68,18 @@ public class FilePartitioningConsumerWriter extends FilePartitioningWriter {
         }
     }
 
-    public String getFileName(){
+    public String getFileName() {
         return fileName.getFileName().toString();
     }
 
     /**
      * 한번 쓰여진 단어인지 확인하는 메소드
+     *
      * @param message Message("a","Acava")
      * @return true
      */
     private boolean isDuplicate(Message message) {
-        return writtenWordset.contains(message.getValue());
+        return writtenWordset.contains(message.getValue().toLowerCase());
     }
 
     private boolean isNotDuplicate(Message message) {
