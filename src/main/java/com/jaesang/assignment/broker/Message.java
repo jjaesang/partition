@@ -3,10 +3,10 @@ package com.jaesang.assignment.broker;
 /**
  * 단어에 대한 키와 함께 Producer/Consumer의 레코드 관리
  */
-public class Message {
+public final class Message {
 
-    private String key;
-    private String value;
+    private final String key;
+    private final String value;
 
     public Message(String key, String value) {
         this.key = key;
@@ -14,23 +14,15 @@ public class Message {
     }
 
     public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
+        return this.key;
     }
 
     public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+        return this.value;
     }
 
     @Override
     public String toString() {
-        return "Message [ key = " + key + ", value = " + value+" ]";
+        return "Message [ key = " + key + ", value = " + value + " ]";
     }
 }
