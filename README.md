@@ -16,8 +16,8 @@
 $ git clone https://github.com/jjaesang/partition.git
 $ cd partition
 $ mkdir output # output을 저장할 directory 생성
-$ mvn compile assembly:single
-$ java -jar target/partition-1.0-jar-with-dependencies.jar input/words.txt output 10
+$ ./mvnw clean package -DskipTests=true -Dbuild.name=partition-job shade:shade
+$ java -jar target/partition-job.jar input/words.txt output 10
 $ echo " partitioning file is finished.. thanks "
 ```
 

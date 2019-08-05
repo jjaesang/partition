@@ -3,52 +3,58 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.jaesang.assignment</groupId>
     <artifactId>partition</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
+    <name>partition</name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.jdk.version>1.8</project.jdk.version>
+    </properties>
 
     <build>
-        <plugins>
+        <sourceDirectory>${project.basedir}/src/main</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                    <configuration>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <source>${project.jdk.version}</source>
+                        <target>${project.jdk.version}</target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <addClasspath>true</addClasspath>
-                                <mainClass>com.jaesang.assignment.FilePartitioningJob</mainClass>
-                            </manifest>
-                        </archive>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
                             <goals>
-                                <goal>single</goal>
+                                <goal>shade</goal>
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <outputFile>${project.basedir}/target/${build.name}.jar</outputFile>
+                        <minimizeJar>false</minimizeJar>
+                        <artifactSet>
+                            <includes>
+                                <include>junit:junit:*</include>
+                                <include>log4j:log4j:*</include>
+                            </includes>
+                        </artifactSet>
+                    </configuration>
                 </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
-        </plugins>
+            </plugins>
+        </pluginManagement>
     </build>
-
-    <properties>
-        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
-    </properties>
 
     <dependencies>
         <dependency>
